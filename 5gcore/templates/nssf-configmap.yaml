@@ -1,0 +1,28 @@
+{{ if .Values.nssf.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: open5gs-nssf-config
+  labels:
+    epc-mode: nssf
+data:
+  nssf.yaml: |
+    #logger:
+       #file: /var/log/open5gs/nssf.log
+    sbi:
+      server:
+        no_tls: true
+      client:
+        no_tls: true
+    nssf:
+      sbi:     
+      - addr: 0.0.0.0
+        advertise: {{ .Values.nssf.serviceName }}.{{ .Release.Namespace }}.svc.cluster.local
+      nsi:
+      - addr: {{ .Values.nrf.serviceName }}.{{ .Release.Namespace }}.svc.cluster.local
+        s_nssai:
+          sst: 1        
+    nrf:
+     sbi:
+      name: {{ .Values.nrf.serviceName }}.{{ .Release.Namespace }}.svc.cluster.local
+{{ end }}

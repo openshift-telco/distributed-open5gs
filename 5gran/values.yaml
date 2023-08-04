@@ -1,0 +1,12 @@
+# Default values for 5gran.
+ran:
+  image:
+    repository: quay.io/adetalho/ueransim
+    pullPolicy: Always
+    tag: "v3.2.6"
+  amf:
+    address: 192.168.123.17
+    port: 30412
+  user:
+    imsi: "imsi-208930000000001"
+  tac: 7

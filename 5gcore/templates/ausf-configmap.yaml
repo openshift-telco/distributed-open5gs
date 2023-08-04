@@ -1,0 +1,22 @@
+{{ if .Values.ausf.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: open5gs-ausf-config
+  labels:
+    epc-mode: ausf
+data:
+  ausf.yaml: |
+    sbi:
+      server:
+        no_tls: true
+      client:
+        no_tls: true
+    ausf:
+      sbi:
+      - addr: 0.0.0.0
+        advertise: {{ .Values.ausf.serviceName }}.{{ .Release.Namespace }}.svc.cluster.local
+    nrf:
+     sbi:
+      name: {{ .Values.nrf.serviceName }}.{{ .Release.Namespace }}.svc.cluster.local
+{{ end }}

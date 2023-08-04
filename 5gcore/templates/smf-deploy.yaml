@@ -1,0 +1,66 @@
+{{ if .Values.smf.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: open5gs-smf
+  annotations:
+    skupper.io/proxy: http2
+    skupper.io/address: open5gs-smf-shared
+  labels:
+    epc-mode: smf
+spec:
+  selector:
+    epc-mode: smf
+  ports:
+    - protocol: TCP
+      port: 80 
+      targetPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: open5gs-smf-pfcp
+  labels:
+    epc-mode: smf
+spec:
+  selector:
+    epc-mode: smf
+  ports:
+    - protocol: UDP
+      port: 8805
+      targetPort: 8805   
+---  
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open5gs-smf-d
+  labels:
+    epc-mode: smf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      epc-mode: smf
+  template:
+    metadata:       
+      labels:
+        epc-mode: smf
+    spec:   
+      containers:
+      - name: smf
+        image: "{{ .Values.open5gcore.image.repository }}:{{ .Values.open5gcore.image.tag }}"
+        imagePullPolicy: {{ .Values.open5gcore.image.pullPolicy }}
+        securityContext:
+          privileged: true
+        command: ["/bin/sh", "-c"]
+        args:
+        - open5gs-smfd -d -c /open5gs/config-map/smf.yaml;
+        volumeMounts:
+          - name: open5gs-smf-config
+            mountPath: /open5gs/config-map/smf.yaml
+            subPath: "smf.yaml"                                       
+      volumes:
+        - name: open5gs-smf-config
+          configMap:
+            name: open5gs-smf-config                
+{{ end }}

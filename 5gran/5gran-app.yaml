@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: open5gran
+  namespace: openshift-gitops
+spec:
+  destination:
+    name: ca-regina
+    namespace: open5gran
+    server: ''
+  source:
+    path: 5gran
+    repoURL: 'https://github.com/adetalhouet/distributed-open5gs'
+    targetRevision: HEAD
+  project: default
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+

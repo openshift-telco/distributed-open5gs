@@ -1,0 +1,50 @@
+{{ if .Values.pcf.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: open5gs-pcf
+  annotations:
+    skupper.io/proxy: http2
+    skupper.io/address: open5gs-pcf-shared
+  labels:
+    epc-mode: pcf
+spec:
+  selector:
+    epc-mode: pcf
+  ports:
+    - protocol: TCP
+      port: 80 
+      targetPort: 80  
+---  
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: open5gs-pcf-d
+  labels:
+    epc-mode: pcf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      epc-mode: pcf
+  template:
+    metadata:
+      labels:
+        epc-mode: pcf
+    spec:    
+      containers:
+        - name: pcf
+          image: "{{ .Values.open5gcore.image.repository }}:{{ .Values.open5gcore.image.tag }}"
+          imagePullPolicy: {{ .Values.open5gcore.image.pullPolicy }}
+          securityContext:
+            privileged: true
+          command: ["open5gs-pcfd", "-d", "-c", "/open5gs/config-map/pcf.yaml"]
+          volumeMounts:
+          - name: open5gs-pcf-config
+            mountPath: /open5gs/config-map/pcf.yaml
+            subPath: "pcf.yaml"          
+      volumes:
+        - name: open5gs-pcf-config
+          configMap:
+            name: open5gs-pcf-config         
+{{ end }}

@@ -1,0 +1,50 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: 5gran
+  labels:
+    epc-mode: 5gran
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      epc-mode: 5gran
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        epc-mode: 5gran
+    spec:    
+      containers:
+      - name: gnb
+        imagePullPolicy: {{ .Values.ran.image.pullPolicy }}
+        image: "{{ .Values.ran.image.repository }}:{{ .Values.ran.image.tag }}" 
+        command: ["/bin/sh","-c","./nr-gnb -c /open5gs/config-map/5gran-gnb-configmap.yaml"]
+        volumeMounts:
+          - name: 5gran-gnb-config
+            mountPath: /open5gs/config-map/5gran-gnb-configmap.yaml
+            subPath: "5gran-gnb-configmap.yaml"
+      - name: ue
+        imagePullPolicy: {{ .Values.ran.image.pullPolicy }}
+        image: "{{ .Values.ran.image.repository }}:{{ .Values.ran.image.tag }}"
+        securityContext:
+          privileged: true
+        command: ["/bin/sh","-c","./nr-ue -c /open5gs/config-map/5gran-ue-configmap.yaml"]
+        volumeMounts:
+          - name: 5gran-ue-config
+            mountPath: /open5gs/config-map/5gran-ue-configmap.yaml
+            subPath: "5gran-ue-configmap.yaml"
+      - name: uebinder
+        imagePullPolicy: {{ .Values.ran.image.pullPolicy }}
+        image: "{{ .Values.ran.image.repository }}:{{ .Values.ran.image.tag }}"
+        securityContext:
+          privileged: true
+        command: ["/bin/sh","-c","sh nr-binder 10.45.0.2 ping www.google.com"]
+      volumes:
+        - name: 5gran-gnb-config
+          configMap:
+            name: 5gran-gnb-config     
+        - name: 5gran-ue-config
+          configMap:
+            name: 5gran-ue-config

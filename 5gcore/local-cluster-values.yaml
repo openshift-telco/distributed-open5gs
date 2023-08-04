@@ -1,0 +1,57 @@
+# Values for ca-central
+
+open5gcore:
+  image:
+    repository: quay.io/adetalho/open5gs
+    pullPolicy: Always
+    tag: "v2.6.4"
+
+webui:
+  enabled: true
+  image:
+    repository: quay.io/adetalho/open5gs-webui 
+    pullPolicy: IfNotPresent
+    tag: "v2.6.4"
+
+dnn: internet  
+
+k8s:
+ interface: eth0
+
+amf:
+  enabled: true
+  mcc: 208
+  mnc: 93
+  tac: 7
+  serviceName: open5gs-amf-shared
+bsf:
+  enabled: true
+  serviceName: open5gs-bsf-shared
+ausf:
+  enabled: true
+  serviceName: open5gs-ausf-shared
+mongodb:
+  enabled: true
+  serviceName: open5gs-mongodb-shared
+nrf:
+  enabled: true
+  serviceName: open5gs-nrf-shared
+nssf:
+  enabled: true
+  serviceName: open5gs-nssf-shared
+pcf:
+  enabled: true
+  serviceName: open5gs-pcf-shared
+udm:
+  enabled: true
+  serviceName: open5gs-udm-shared
+udr:
+  enabled: true
+  serviceName: open5gs-udr-shared
+upf:
+  enabled: false
+  pfcpServiceName: open5gs-upf-pfcp #-shared
+smf:
+  enabled: false
+  pfcpServiceName: open5gs-smf-pfcp #-shared
+  serviceName: open5gs-smf-shared

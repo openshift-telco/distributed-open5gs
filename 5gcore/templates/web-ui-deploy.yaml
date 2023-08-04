@@ -1,0 +1,63 @@
+{{ if .Values.webui.enabled }}
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: webui
+  labels:
+    epc-mode: webui
+spec:
+  to:
+    kind: Service
+    name: open5gs-webui
+    weight: 100
+  port:
+    targetPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: open5gs-webui
+  annotations:
+    skupper.io/proxy: http
+    skupper.io/address: open5gs-webui-shared
+  labels:
+    epc-mode: webui
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 3000
+  selector:
+    epc-mode: webui
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open5gs-webui-d
+  labels:
+    epc-mode: webui
+    part-of-mesh: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      epc-mode: webui
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        epc-mode: webui
+    spec:    
+      containers:
+      - name: webui
+        imagePullPolicy: {{ .Values.webui.image.pullPolicy }}
+        image: "{{ .Values.webui.image.repository }}:{{ .Values.webui.image.tag }}"      
+        env:
+        - name: DB_URI
+          value: mongodb://{{ .Values.mongodb.serviceName }}/open5gs
+        - name: NODE_ENV
+          value: "production"  
+        - name: HOSTNAME
+          value: '0.0.0.0'               
+{{ end }}
