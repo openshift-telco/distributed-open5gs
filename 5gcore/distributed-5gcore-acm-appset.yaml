@@ -18,7 +18,7 @@ spec:
       project: default
       source:
         repoURL: 'https://github.com/openshift-telco/distributed-open5gs'
-        targetRevision: main
+        targetRevision: upf-only
         path: '5gcore'
         helm: 
           valueFiles:

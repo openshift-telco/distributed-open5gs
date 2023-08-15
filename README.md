@@ -169,6 +169,15 @@ And by looking at the service interactions, we can see the distributed SMF conne
 
 ![](asstes/smf-registration.png)
 
+## [Temporary - RHSI UDP Support]
+
+In order for the UPF and the SMF to have PFCP communication, we need to deploy according UDP bridge adapter enabling Red Hat Service Interconnect to properly route that traffic in the Virtual Application Network.
+
+~~~
+skupper expose deployment open5gs-upf-d --port 8805 --protocol udp --bridge-image=quay.io/gordons/skupper-udp-bridge:sticky --namespace open5gcore --kubeconfig /root/ca-regina-kubeconfig --address open5gs-upf-pfcp-shared
+skupper expose deployment open5gs-smf-d --port 8805 --protocol udp --bridge-image=quay.io/gordons/skupper-udp-bridge:sticky --namespace open5gcore --address open5gs-smf-pfcp-shared
+~~~
+
 ## Provision the user equipment
 
 The Open5GS project comes with a webui that allows you to register UE. As such, log in the UI to register the UE.
