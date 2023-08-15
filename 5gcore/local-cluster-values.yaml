@@ -50,8 +50,8 @@ udr:
   serviceName: open5gs-udr-shared
 upf:
   enabled: false
-  pfcpServiceName: open5gs-upf-pfcp #-shared
+  pfcpServiceName: open5gs-upf-pfcp-shared
 smf:
-  enabled: false
-  pfcpServiceName: open5gs-smf-pfcp #-shared
+  enabled: true
+  pfcpServiceName: open5gs-smf-pfcp-shared
   serviceName: open5gs-smf-shared
