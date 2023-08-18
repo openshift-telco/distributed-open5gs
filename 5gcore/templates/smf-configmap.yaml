@@ -1,0 +1,49 @@
+{{ if .Values.smf.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: open5gs-smf-config
+  labels:
+    epc-mode: smf
+data:
+  smf.yaml: |
+    #logger:
+       #file: /var/log/open5gs/smf.log
+    # time:
+    #   nf_instance:
+    #     heartbeat: 600 #10mn
+    #   message:
+    #     duration: 60000 #1mn
+    sbi:
+      server:
+        no_tls: true
+      client:
+        no_tls: true
+    parameter:
+        no_ipv6: true
+    smf:
+        sbi:     
+          - addr: 0.0.0.0
+            advertise: {{ .Values.smf.serviceName }}.{{ .Release.Namespace }}.svc.cluster.local
+        pfcp:
+          - dev: {{ .Values.k8s.interface }}
+            advertise: {{ .Values.smf.pfcpServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
+        gtpc:
+          dev: {{ .Values.k8s.interface }}
+        gtpu:
+          dev: {{ .Values.k8s.interface }}    
+        subnet:
+          - addr: 10.45.0.1/16
+            dnn: {{ .Values.dnn }}
+        dns:
+          - 8.8.8.8
+          - 8.8.4.4
+        mtu: 1400
+    nrf:
+     sbi:
+      name: {{ .Values.nrf.serviceName }}.{{ .Release.Namespace }}.svc.cluster.local
+    upf:
+      pfcp:
+        - addr: {{ .Values.upf.pfcpServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
+          dnn: {{ .Values.dnn }}
+{{ end }}

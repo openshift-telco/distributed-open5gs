@@ -1,0 +1,20 @@
+{{ if .Values.nrf.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: open5gs-nrf-config
+  labels:
+    epc-mode: nrf
+data:
+  nrf.yaml: |
+    #logger:
+       #file: /var/log/open5gs/nrf.log
+    sbi:
+      server:
+        no_tls: true
+      client:
+        no_tls: true
+    nrf:
+        sbi:
+          addr: 0.0.0.0
+{{ end }}

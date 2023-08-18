@@ -1,0 +1,49 @@
+# Values for ca-regina
+
+open5gcore:
+  image:
+    repository: quay.io/adetalho/open5gs
+    pullPolicy: IfNotPresent
+    tag: "v2.6.4"
+
+webui:
+  enabled: false
+  image:
+    repository: quay.io/adetalho/open5gs-webui 
+    pullPolicy: IfNotPresent
+    tag: "v2.6.4"
+
+dnn: internet  
+
+k8s:
+ interface: eth0
+
+amf:
+  enabled: false
+  mcc: 208
+  mnc: 93
+  tac: 7
+bsf:
+  enabled: false
+ausf:
+  enabled: false
+mongodb:
+  enabled: false
+nrf:
+  enabled: false
+  serviceName: open5gs-nrf-shared
+nssf:
+  enabled: false
+pcf:
+  enabled: false
+udm:
+  enabled: false
+udr:
+  enabled: false
+smf:
+  enabled: true
+  serviceName: open5gs-smf-shared
+  pfcpServiceName: open5gs-smf-pfcp #-shared
+upf:
+  enabled: true
+  pfcpServiceName: open5gs-upf-pfcp #-shared

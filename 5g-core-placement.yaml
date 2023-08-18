@@ -1,0 +1,8 @@
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: 5g-core-clusters
+  namespace: openshift-gitops
+spec:
+  clusterSets:
+    - 5g-core

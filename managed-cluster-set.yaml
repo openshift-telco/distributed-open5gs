@@ -1,0 +1,14 @@
+---
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSet
+metadata:
+  name: 5g-core
+spec: {}
+---
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSetBinding
+metadata:
+  name: 5g-core
+  namespace: openshift-gitops
+spec:
+  clusterSet: 5g-core

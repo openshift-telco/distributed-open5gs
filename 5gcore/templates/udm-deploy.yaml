@@ -1,0 +1,50 @@
+{{ if .Values.udm.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: open5gs-udm
+  annotations:
+    skupper.io/proxy: http2
+    skupper.io/address: open5gs-udm-shared
+  labels:
+    epc-mode: udm
+spec:
+  selector:
+    epc-mode: udm
+  ports:
+    - protocol: TCP
+      port: 80   
+      targetPort: 80
+---  
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open5gs-udm-d
+  labels:
+    epc-mode: udm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      epc-mode: udm
+  template:
+    metadata:
+      labels:
+        epc-mode: udm
+    spec:   
+      containers:
+        - name: udm
+          image: "{{ .Values.open5gcore.image.repository }}:{{ .Values.open5gcore.image.tag }}"
+          imagePullPolicy: {{ .Values.open5gcore.image.pullPolicy }}
+          securityContext:
+            privileged: true
+          command: ["open5gs-udmd", "-d", "-c", "/open5gs/config-map/udm.yaml"]
+          volumeMounts:
+          - name: open5gs-udm-config
+            mountPath: /open5gs/config-map/udm.yaml
+            subPath: "udm.yaml"
+      volumes:
+        - name: open5gs-udm-config
+          configMap:
+            name: open5gs-udm-config
+{{ end }}

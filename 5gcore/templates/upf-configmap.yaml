@@ -1,0 +1,31 @@
+{{ if .Values.upf.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: open5gs-upf-config
+  labels:
+    epc-mode: upf
+data:
+  upf.yaml: |
+    sbi:
+      server:
+        no_tls: true
+      client:
+        no_tls: true
+    # time:
+    #   message:
+    #     duration: 60000 #1mn
+    upf:
+        pfcp:
+           - dev: {{ .Values.k8s.interface }}
+             advertise: {{ .Values.upf.pfcpServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
+        gtpu:
+           - dev: {{ .Values.k8s.interface }}
+        subnet:
+          - addr: 10.45.0.1/16
+            dnn: {{ .Values.dnn }}
+            dev: ogstun
+    smf:
+        pfcp:
+          addr: {{ .Values.smf.pfcpServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
+{{ end }}

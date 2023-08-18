@@ -1,0 +1,51 @@
+{{ if .Values.bsf.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: open5gs-bsf
+  annotations:
+    skupper.io/proxy: http2
+    skupper.io/address: open5gs-bsf-shared
+  labels:
+    epc-mode: bsf
+spec:
+  selector:
+    epc-mode: bsf
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---    
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open5gs-bsf-d
+  labels:
+    epc-mode: bsf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      epc-mode: bsf
+  template:
+    metadata:
+      labels:
+        epc-mode: bsf
+    spec:  
+      containers:
+        - name: bsf
+          image: "{{ .Values.open5gcore.image.repository }}:{{ .Values.open5gcore.image.tag }}"
+          imagePullPolicy: {{ .Values.open5gcore.image.pullPolicy }}
+          securityContext:
+            privileged: true
+          command: ["open5gs-bsfd", "-d", "-c", "/open5gs/config-map/bsf.yaml"]
+          volumeMounts:
+            - name: open5gs-bsf-config
+              mountPath: /open5gs/config-map/bsf.yaml
+              subPath: "bsf.yaml"
+      volumes:
+        - name: open5gs-bsf-config
+          configMap:
+            name: open5gs-bsf-config
+
+{{ end }}

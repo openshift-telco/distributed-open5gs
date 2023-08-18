@@ -1,0 +1,50 @@
+{{ if .Values.ausf.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: open5gs-ausf
+  annotations:
+    skupper.io/proxy: http2
+    skupper.io/address: open5gs-ausf-shared
+  labels:
+    epc-mode: ausf
+spec:
+  selector:
+    epc-mode: ausf
+  ports:
+    - protocol: TCP
+      port: 80   
+      targetPort: 80
+---  
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open5gs-ausf-d
+  labels:
+    epc-mode: ausf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      epc-mode: ausf
+  template:
+    metadata:
+      labels:
+        epc-mode: ausf
+    spec:    
+      containers:
+        - name: ausf
+          image: "{{ .Values.open5gcore.image.repository }}:{{ .Values.open5gcore.image.tag }}"
+          imagePullPolicy: {{ .Values.open5gcore.image.pullPolicy }}
+          securityContext:
+            privileged: true
+          command: ["open5gs-ausfd", "-d", "-c", "/open5gs/config-map/ausf.yaml"]
+          volumeMounts:
+          - name: open5gs-ausf-config
+            mountPath: /open5gs/config-map/ausf.yaml
+            subPath: "ausf.yaml"
+      volumes:
+        - name: open5gs-ausf-config
+          configMap:
+            name: open5gs-ausf-config
+{{ end }}

@@ -1,0 +1,9 @@
+apiVersion: v2
+name: 5gran
+description: A Helm Chart for 5GRAN
+
+type: application
+
+version: 0.0.1
+
+appVersion: 1.1

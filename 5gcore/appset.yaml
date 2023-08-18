@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: distributed-5g-core
+  namespace: openshift-gitops
+spec:
+  generators:
+    - clusterDecisionResource:
+        configMapRef: acm-placement
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: 5g-core-clusters
+        requeueAfterSeconds: 10
+  template:
+    metadata:
+      name: 'distributed-5g-core-{{name}}'
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/openshift-telco/distributed-open5gs'
+        targetRevision: main
+        path: '5gcore'
+        helm: 
+          valueFiles:
+            - '{{name}}-values.yaml'
+      destination:
+        server: '{{server}}'
+        namespace: open5gcore
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

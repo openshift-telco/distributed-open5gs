@@ -1,0 +1,25 @@
+{{ if .Values.udr.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: open5gs-udr-config
+  labels:
+    epc-mode: udr
+data:
+  udr.yaml: |
+    #logger:
+      #file: /var/log/open5gs/udr.log
+    db_uri: mongodb://{{ .Values.mongodb.serviceName }}/open5gs
+    sbi:
+      server:
+        no_tls: true
+      client:
+        no_tls: true
+    udr:
+      sbi:
+      - addr: 0.0.0.0
+        advertise: {{ .Values.udr.serviceName }}.{{ .Release.Namespace }}.svc.cluster.local
+    nrf:
+     sbi:
+      name: {{ .Values.nrf.serviceName }}.{{ .Release.Namespace }}.svc.cluster.local
+{{ end }}

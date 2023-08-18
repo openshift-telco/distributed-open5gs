@@ -1,0 +1,83 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ran-job-role
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - list
+      - create
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ran-job-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ran-job-role
+subjects:
+  - kind: ServiceAccount
+    name: cli-job-sa
+    namespace: open5gran
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cli-job-sa
+  namespace: open5gran
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: patch-gnb-amf-sctp-ip
+  namespace: open5gran
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+spec:
+  template:
+    spec:
+      containers:
+        - image: registry.redhat.io/openshift4/ose-cli:latest
+          command:
+            - /bin/bash
+            - -c
+            - |
+              oc get cm -n open5gran 5gran-gnb-config
+              if [[ $? == 0 ]]
+              then 
+                AMF_SCTP_SERVICE_IP=$(oc get service -n open5gcore amf-open5gs-sctp -o jsonpath={.spec.clusterIP})
+
+                DATA=$(oc get cm -n open5gran 5gran-gnb-config -o jsonpath={.data})
+                ESCAPE_DATA=$( echo $DATA | jq -Rs .)
+                DATA=${ESCAPE_DATA/AMF_SCTP_SERVICE_ADDRESS/$AMF_SCTP_SERVICE_IP}
+
+                oc patch cm 5gran-gnb-config -n open5gran --type='json' -p='[{"op" : "add" ,"path" : "/data/oidc.keycloak.clientSecret" ,"value" : "'${DATA}'"}]'
+
+              else
+                exit 1
+              fi
+          imagePullPolicy: Always
+          name: patch-gnb-amf-sctp-ip
+          resources:
+            limits:
+              cpu: 500m
+              memory: 256Mi
+            requests:
+              cpu: 250m
+              memory: 128Mi
+      dnsPolicy: ClusterFirst
+      restartPolicy: OnFailure
+      serviceAccount: cli-job-sa
+      serviceAccountName: cli-job-sa
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: argocd-secret-oidc
+        secret:
+          secretName: argocd-secret-oidc

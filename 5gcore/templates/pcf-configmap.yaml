@@ -1,0 +1,25 @@
+{{ if .Values.pcf.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: open5gs-pcf-config
+  labels:
+    epc-mode: pcf
+data:
+  pcf.yaml: |
+    #logger:
+       #file: /var/log/open5gs/pcf.log
+    db_uri: mongodb://{{ .Values.mongodb.serviceName }}/open5gs    
+    sbi:
+      server:
+        no_tls: true
+      client:
+        no_tls: true
+    pcf:
+      sbi:     
+      - addr: 0.0.0.0
+        advertise: {{ .Values.pcf.serviceName }}.{{ .Release.Namespace }}.svc.cluster.local
+    nrf:
+     sbi:
+      name: {{ .Values.nrf.serviceName }}.{{ .Release.Namespace }}.svc.cluster.local
+{{ end }}

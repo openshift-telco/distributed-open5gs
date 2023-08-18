@@ -1,0 +1,50 @@
+{{ if .Values.udr.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: open5gs-udr
+  annotations:
+    skupper.io/proxy: http2
+    skupper.io/address: open5gs-udr-shared
+  labels:
+    epc-mode: udr
+spec:
+  selector:
+    epc-mode: udr
+  ports:
+    - protocol: TCP
+      port: 80   
+      targetPort: 80
+---  
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open5gs-udr-d
+  labels:
+    epc-mode: udr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      epc-mode: udr
+  template:
+    metadata:
+      labels:
+        epc-mode: udr
+    spec:   
+      containers:
+        - name: udr
+          image: "{{ .Values.open5gcore.image.repository }}:{{ .Values.open5gcore.image.tag }}"
+          imagePullPolicy: {{ .Values.open5gcore.image.pullPolicy }}
+          securityContext:
+            privileged: true
+          command: ["open5gs-udrd", "-d", "-c", "/open5gs/config-map/udr.yaml"]
+          volumeMounts:
+          - name: open5gs-udr-config
+            mountPath: /open5gs/config-map/udr.yaml
+            subPath: "udr.yaml"          
+      volumes:
+        - name: open5gs-udr-config
+          configMap:
+            name: open5gs-udr-config
+{{ end }}
